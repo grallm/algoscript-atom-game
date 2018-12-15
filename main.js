@@ -17,15 +17,12 @@ var polyElecL = []; // [[x,y,t]] Explosion lors disparition électrons libres (r
 FrameRate = 60;
 var recordPartie = 1; // Score partie
 if (!recordSession) var recordSession = 1; // Score record
-var difficulte = 1;
-
+var difficulte = 1; // Permet de régler difficulté: nombres de touches + vitesse de baisse/montée de l'énergie
 // Démarrage
-//menuPrincipal();
-partieUnJoueur();
+menuPrincipal();
 
 
 // Remettre les valeurs par défaut
-
 
 function resetVars() {
   jeu = [false, 0, 1, 1, 0];
@@ -73,7 +70,6 @@ function menuPrincipal() {
 
 // Menu paramètres
 
-
 function menuParams() {
   localisation = "params";
 
@@ -102,7 +98,6 @@ function menuParams() {
 
 
 // Page de perte
-
 
 function menuPerdu() {
   localisation = "perduGagne";
@@ -143,7 +138,6 @@ function menuPerdu() {
 
 
 // Page de victoire
-
 
 function menuGagne() {
   localisation = "perduGagne";
@@ -222,7 +216,7 @@ function MouseClick(x, y) {
       menuPrincipal();
 
     } else if (jeu[0]) {
-      energie += 25;
+      energie += 20 * difficulte; // Difficulte : vitesse énergie augmente
     }
     break;
 
@@ -263,7 +257,6 @@ function MouseClick(x, y) {
 
 // Dessiner un noyau d'atome: cercle + nom élément
 
-
 function dessinerNoyau(x, y, n) {
   CerclePlein(x, y, 50 + 5 * (n - 1), rgb(r - 7 * n, g + 5 * n, b - 13 * n));
   setCanvasFont("helvetica", "18pt", "normal");
@@ -293,7 +286,6 @@ function addElec() {
     electrons.push(1);
   }
   jeu[2]++; // Ajouter numéro atomique
-
   // Victoire
   if (jeu[2] > 18) {
     menuGagne();
@@ -433,7 +425,7 @@ function genCombTouchesElec(n) {
   var combTouches = [];
 
   // Générer touches, n électrons = combinaison n touches
-  var nbTouches = Math.round(jeu[2] / 4) + 1;
+  var nbTouches = Math.round(jeu[2] / 4) + 1 * difficulte; // Difficulte : nombre de touches combinaison
   for (var i = 0; i < nbTouches; i++) {
     var touche = Hasard(36) + 65; // Lettre ou chiffre
     touche = (touche > 90) ? touche - 43 : touche;
@@ -506,8 +498,7 @@ var energie = 500; // % énergie
 var virerElec = 0;
 
 function energyBar() {
-  if (energie > 0 && energie < 1000) energie -= 2;
-
+  if (energie > 0 && energie < 1000) energie -= 1 * difficulte; // Niveau de difficulte énergie
   RectanglePlein(centre[0] / 6, yBas, 50, -Math.round(energie * hauteur / 1000), "orange");
   Rectangle(centre[0] / 6, 50, 50, hauteur, "black");
   setCanvasFont("helvetica", "18pt", "normal");
