@@ -1,8 +1,14 @@
-turtleEnabled=false;
+// Images
+turtleEnabled = false;
+var paramsButton = PreloadImage("https://images.ecosia.org/ilbROjBxJe3GqUG2WczJ7H9nxKM=/0x390/smart/https%3A%2F%2Fcdn.pixabay.com%2Fphoto%2F2014%2F10%2F09%2F13%2F14%2Fsettings-481826_960_720.png");
+var backToMenu = PreloadImage("https://image.flaticon.com/icons/png/512/0/340.png");
+
 // Valeurs variables par défaut
 var atomes = ["H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne", "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar"];
 var centre = [Math.round(document.documentElement.clientWidth / 2), Math.round(document.documentElement.clientHeight / 2) - 15];
-var r=250, g=100, b=150;
+var r = 250,
+ g = 100,
+ b = 150;
 var localisation; // Connaître quel menu
 var jeu = [false, 0, 1, 1, 0]; // Paramètre jeu: [EN JEU, TYPE, ATOME et ELECTRONS, COUCHES, NOMBRES ELECTRONS, ACCU pos tour ELEC]
 var electrons = [1]; // Stockage tous les électrons: nb élec / couche
@@ -10,15 +16,18 @@ var electronsLibres = []; // Electrons se déplaçant: [[x, y, x0, y0, direction
 var polyElecL = []; // [[x,y,t]] Explosion lors disparition électrons libres (raté)
 FrameRate = 60;
 var recordPartie = 1; // Score partie
-if(!recordSession) var recordSession = 1; // Score record
+if (!recordSession) var recordSession = 1; // Score record
 var difficulte = 1;
 
 // Démarrage
-menuPrincipal();
+//menuPrincipal();
+partieUnJoueur();
 
 
 // Remettre les valeurs par défaut
-function resetVars(){
+
+
+function resetVars() {
   jeu = [false, 0, 1, 1, 0];
   electrons = [1];
   electronsLibres = [];
@@ -48,46 +57,42 @@ function menuPrincipal() {
 
   // Règles
   setCanvasFont("helvetica", "18pt", "normal");
-  Texte(centre[0] - 410, centre[1]-20, "Le but est d'avoir le plus gros atome avec le plus d'électrons, vous devez ainsi: \n"+
-        "   - attraper les électrons en réalisant la combinaison de touche à droite\n"+
-        "   - rester entre les 2 traits de la barre d'énergie en cliquant\n\n"+
-        "Vous perdrez des électrons en restant en-dehors des barres de limite\n"+
-        "Votre atome explosera si vous sortez des limites de la barre d'énergie\n"+
-        "Vous perdrez si votre atome n'a plus d'électrons\n"+
-        "Votre atome gagne de l'énergie si vous vous trompez de combinaison", "black");
+  Texte(centre[0] - 410, centre[1] - 20, "Le but est d'avoir le plus gros atome avec le plus d'électrons, vous devez ainsi: \n" + "   - attraper les électrons en réalisant la combinaison de touche à droite\n" + "   - rester entre les 2 traits de la barre d'énergie en cliquant\n\n" + "Vous perdrez des électrons en restant en-dehors des barres de limite\n" + "Votre atome explosera si vous sortez des limites de la barre d'énergie\n" + "Vous perdrez si votre atome n'a plus d'électrons\n" + "Votre atome gagne de l'énergie si vous vous trompez de combinaison", "black");
 
   // Affiche record de la session
   setCanvasFont("helvetica", "30pt", "normal");
-  Texte(centre[0] - 220, centre[1]+250, "Record: " + recordSession, "black");
-  dessinerNoyau(centre[0]+40, centre[1]+235, recordSession);
+  Texte(centre[0] - 220, centre[1] + 250, "Record: " + recordSession, "black");
+  dessinerNoyau(centre[0] + 40, centre[1] + 235, recordSession);
 
-  /*RectanglePlein(centre[0]-150, 500, 300, 100, "lightgray");
+/*RectanglePlein(centre[0]-150, 500, 300, 100, "lightgray");
 	Texte(centre[0]-140, 565, "Paramètres", "black");*/
-  
-  DrawImage("https://images.ecosia.org/ilbROjBxJe3GqUG2WczJ7H9nxKM=/0x390/smart/https%3A%2F%2Fcdn.pixabay.com%2Fphoto%2F2014%2F10%2F09%2F13%2F14%2Fsettings-481826_960_720.png",20,20,100,100);
+
+  DrawImageObject(paramsButton, 20, 20, 100, 100);
 }
 
 
 // Menu paramètres
-function menuParams(){
+
+
+function menuParams() {
   localisation = "params";
 
   noLoop();
-  jeu[0]=false;
+  jeu[0] = false;
 
   Initialiser();
 
   setCanvasFont("helvetica", "40pt", "normal");
   Texte(centre[0] - 140, 100, "Paramètres", "black");
 
-  RectanglePlein(centre[0]-500, 200, 300, 100, (difficulte == 1) ? "gray" : "lightgray");
+  RectanglePlein(centre[0] - 500, 200, 300, 100, (difficulte == 1) ? "gray" : "lightgray");
   Texte(centre[0] - 440, 265, "Normal", "green");
 
-  RectanglePlein(centre[0]-150, 200, 300, 100, (difficulte == 2) ? "gray" : "lightgray");
+  RectanglePlein(centre[0] - 150, 200, 300, 100, (difficulte == 2) ? "gray" : "lightgray");
   Texte(centre[0] - 90, 265, "Difficile", "orange");
 
   setCanvasFont("helvetica", "30pt", "italic");
-  RectanglePlein(centre[0]+200, 200, 300, 100, (difficulte == 3) ? "gray" : "lightgray");
+  RectanglePlein(centre[0] + 200, 200, 300, 100, (difficulte == 3) ? "gray" : "lightgray");
   Texte(centre[0] + 220, 265, "Insurmontable", "red");
 
   setCanvasFont("helvetica", "40pt", "normal");
@@ -97,19 +102,21 @@ function menuParams(){
 
 
 // Page de perte
-function menuPerdu(){
+
+
+function menuPerdu() {
   localisation = "perduGagne";
 
   noLoop();
-  jeu[0]=false;
+  jeu[0] = false;
 
   // Changer le record
-  if(recordPartie > recordSession){
+  if (recordPartie > recordSession) {
     recordSession = recordPartie;
   }
 
   // Fond flou
-  RectanglePlein(0,0, centre[0]*2,centre[1]*2, rgba(255,255,255, 0.6));
+  RectanglePlein(0, 0, centre[0] * 2, centre[1] * 2, rgba(255, 255, 255, 0.6));
 
   setCanvasFont("helvetica", "40pt", "bold");
   Texte(centre[0] - 100, 100, "Perdu !", "red");
@@ -123,27 +130,29 @@ function menuPerdu(){
 
   // Affiche score de la partie
   setCanvasFont("helvetica", "30pt", "normal");
-  Texte(centre[0] - 200, centre[1]+70, "Score: " + recordPartie, "black");
-  dessinerNoyau(centre[0]+40, centre[1]+55, recordPartie);
+  Texte(centre[0] - 200, centre[1] + 70, "Score: " + recordPartie, "black");
+  dessinerNoyau(centre[0] + 40, centre[1] + 55, recordPartie);
 
   // Affiche record de la session
   setCanvasFont("helvetica", "30pt", "normal");
-  Texte(centre[0] - 220, centre[1]+200, "Record: " + recordSession, "black");
-  dessinerNoyau(centre[0]+40, centre[1]+185, recordSession);
+  Texte(centre[0] - 220, centre[1] + 200, "Record: " + recordSession, "black");
+  dessinerNoyau(centre[0] + 40, centre[1] + 185, recordSession);
 
   resetVars();
 }
 
 
 // Page de victoire
-function menuGagne(){
+
+
+function menuGagne() {
   localisation = "perduGagne";
 
   noLoop();
-  jeu[0]=false;
+  jeu[0] = false;
 
   // Fond flou
-  RectanglePlein(0,0, centre[0]*2,centre[1]*2, rgba(255,255,255, 0.6));
+  RectanglePlein(0, 0, centre[0] * 2, centre[1] * 2, rgba(255, 255, 255, 0.6));
 
   setCanvasFont("helvetica", "40pt", "bold");
   Texte(centre[0] - 100, 100, "Gagné !", "green");
@@ -161,8 +170,8 @@ function menuGagne(){
 
   // Affiche record de la session
   setCanvasFont("helvetica", "30pt", "normal");
-  Texte(centre[0] - 300, centre[1]+200, "Record précédent: " + recordSession, "black");
-  dessinerNoyau(centre[0]+150, centre[1]+185, recordSession);
+  Texte(centre[0] - 300, centre[1] + 200, "Record précédent: " + recordSession, "black");
+  dessinerNoyau(centre[0] + 150, centre[1] + 185, recordSession);
 
   Texte(centre[0] - 250, centre[1], "Essayez de rejouer avec la difficulté supérieure !", "black");
 
@@ -175,79 +184,88 @@ function menuGagne(){
 
 function MouseClick(x, y) {
   switch (localisation) {
-    case "principal":
-      // Menu: 1 joueur
-      //if (x > 500 && x < 800 && y > 200 && y < 300) {
-      if (x > centre[0]-350 && x < centre[0]-50 && y > 200 && y < 300) {
-        partieUnJoueur();
+  case "principal":
+    // Menu: 1 joueur
+    //if (x > 500 && x < 800 && y > 200 && y < 300) {
+    if (x > centre[0] - 350 && x < centre[0] - 50 && y > 200 && y < 300) {
+      partieUnJoueur();
 
-        // Menu: 2 joueurs
-        /*} else if (x > 950 && x < 1150 && y > 200 && y < 300) {
+      // Menu: 2 joueurs
+/*} else if (x > 950 && x < 1150 && y > 200 && y < 300) {
 	  alert("2 joueurs");*/
 
-        // Menu: paramètres
-        /*} else if (x > 725 && x < 1025 && y > 500 && y < 600) {
+      // Menu: paramètres
+/*} else if (x > 725 && x < 1025 && y > 500 && y < 600) {
 	  alert("Paramètres");*/
-      
-      }else if(x > 0 && x < 110 && y > 0 && y < 110) {
-        menuParams();
-      }
-      break;
 
-    case "partieUnJoueur":
-      // Pause
-      if (x > centre[0] * 2 - 140 && y < 150) {
-        if (jeu[0]) {
-          noLoop();
-          jeu[0] = false;
-          drawPlay();
-        } else {
-          Loop(-1);
-          jeu[0] = true;
-        }
-      } else if (jeu[0]) {
-        energie += 25;
-      }
-      break;
+    } else if (x > 0 && x < 110 && y > 0 && y < 110) {
+      menuParams();
+    }
+    break;
 
-    case "perduGagne":
-      // Rejouer
-      if (x > centre[0]-350 && x < centre[0]-50 && y > 200 && y < 300) {
-        partieUnJoueur();
-
-        // Menu principal
-      } else if (x > centre[0]+50 && x < centre[0]+350 && y > 200 && y < 300) {
-        menuPrincipal();
+  case "partieUnJoueur":
+    // Pause
+    if (x > centre[0] * 2 - 140 && y < 150) {
+      if (jeu[0]) {
+        noLoop();
+        jeu[0] = false;
+        drawPlay();
+      } else {
+        Loop(-1);
+        jeu[0] = true;
       }
-      break;
+      // Retour Menu
+    } else if (x > (centre[0] * 2 - 115) && y > (centre[1] * 2 - 115)) {
+      noLoop();
+      jeu[0] = false;
+      resetVars();
+      menuPrincipal();
 
-    case "params":
-      // Difficulté
-      if (x > centre[0]-500 && x < centre[0]-200 && y > 200 && y < 300) { // Normal
-        difficulte=1;
-        menuParams();
-      }else if (x > centre[0]-150 && x < centre[0]+150 && y > 200 && y < 300) { // Difficile
-        difficulte=2;
-        menuParams();
-      }else if (x > centre[0]+200 && x < centre[0]+500 && y > 200 && y < 300) { // Insurmontable
-        difficulte=3;
-        menuParams();
-      }else if (x > centre[0]-150 && x < centre[0]+150 && y > 400 && y < 500) { // Menu
-        menuPrincipal();
-      }
+    } else if (jeu[0]) {
+      energie += 25;
+    }
+    break;
 
-    case "TEST":
-      // TEST = ACTION LORS CLICK (click en bas)
-      if (y > (centre[1] + 2 * (centre[1] / 3))) {
-        menuPerdu();
-      }
+  case "perduGagne":
+    // Rejouer
+    if (x > centre[0] - 350 && x < centre[0] - 50 && y > 200 && y < 300) {
+      partieUnJoueur();
+
+      // Menu principal
+    } else if (x > centre[0] + 50 && x < centre[0] + 350 && y > 200 && y < 300) {
+      menuPrincipal();
+    }
+    break;
+
+  case "params":
+    // Difficulté
+    if (x > centre[0] - 500 && x < centre[0] - 200 && y > 200 && y < 300) { // Normal
+      difficulte = 1;
+      menuParams();
+    } else if (x > centre[0] - 150 && x < centre[0] + 150 && y > 200 && y < 300) { // Difficile
+      difficulte = 2;
+      menuParams();
+    } else if (x > centre[0] + 200 && x < centre[0] + 500 && y > 200 && y < 300) { // Insurmontable
+      difficulte = 3;
+      menuParams();
+    } else if (x > centre[0] - 150 && x < centre[0] + 150 && y > 400 && y < 500) { // Menu
+      menuPrincipal();
+    }
+
+  case "TEST":
+    // TEST = ACTION LORS CLICK (click en bas)
+    if (y > (centre[1] + 2 * (centre[1] / 3))) {
+      menuPerdu();
+    }
   }
 }
 
 
 // Dessiner un noyau d'atome: cercle + nom élément
-function dessinerNoyau(x, y, n){
-  CerclePlein(x, y, 50 + 5 * (n - 1), rgb(r-7*n, g+5*n, b-13*n));
+
+
+function dessinerNoyau(x, y, n) {
+  CerclePlein(x, y, 50 + 5 * (n - 1), rgb(r - 7 * n, g + 5 * n, b - 13 * n));
   setCanvasFont("helvetica", "18pt", "normal");
   Texte(x - 10, y + 10, atomes[n - 1], "black");
 }
@@ -276,14 +294,13 @@ function addElec() {
   }
   jeu[2]++; // Ajouter numéro atomique
 
-
   // Victoire
-  if(jeu[2]>18){
+  if (jeu[2] > 18) {
     menuGagne();
   }
 
   // Changer le score
-  if(jeu[2] > recordPartie){
+  if (jeu[2] > recordPartie) {
     recordPartie = jeu[2];
   }
 }
@@ -292,10 +309,10 @@ function addElec() {
 
 function delElec() {
   jeu[2]--; // Retirer numéro atomique
-  if(jeu[2]<=0){ // Perdu car tous d'électrons
+  if (jeu[2] <= 0) { // Perdu car tous d'électrons
     menuPerdu();
-  }else if (electrons[Taille(electrons)-1] > 1) { // Retirer 1 électron à la dernière couche
-    electrons[Taille(electrons)-1] = enEntier(electrons[Taille(electrons)-1]) - 1;
+  } else if (electrons[Taille(electrons) - 1] > 1) { // Retirer 1 électron à la dernière couche
+    electrons[Taille(electrons) - 1] = enEntier(electrons[Taille(electrons) - 1]) - 1;
   } else {
     jeu[3]--; // Retirer couche
     electrons.pop();
@@ -347,8 +364,8 @@ function deplacElecs() {
 
 
 function Keypressed(k) {
-  if (jeu[0]==true && Taille(electronsLibres) > 0) {
-    if(localisation =="perduGagne"){
+  if (jeu[0] == true && Taille(electronsLibres) > 0) {
+    if (localisation == "perduGagne") {
       alert(k);
     }
     // Regarder si touche appuyée correspond
@@ -389,7 +406,7 @@ function Keypressed(k) {
 // Afficher polynomes d'explosion des électrons libres
 
 function drawPolyElecL() {
-  /*var polys = Taille(polyElecL);
+/*var polys = Taille(polyElecL);
 	for(var i=0; i<polys; i++){
 	  if(polyElecL[i][2] > 0){ // PROBLEME LORSQUE ELECTRON SORT ou ERREUR TOUCHE
 		var cotes = [];
@@ -501,21 +518,21 @@ function energyBar() {
   Ligne(x - 5, midHaut, x + 55, midHaut, "black");
   Ligne(x - 5, midBas, x + 55, midBas, "black");
 
-  if(energie >= 375 && energie <= 625 && virerElec != 0){
+  if (energie >= 375 && energie <= 625 && virerElec != 0) {
     virerElec = 0;
 
     // Si sort de la barre
-  }else if(energie <= 0){
+  } else if (energie <= 0) {
     menuPerdu();
-  }else if(energie >= 1000){
+  } else if (energie >= 1000) {
     menuPerdu();
 
     // Au dessous/dessus des barres de limite
-  }else if(energie < 375 || energie > 625){
+  } else if (energie < 375 || energie > 625) {
     virerElec++;
-    if(virerElec >= 60) {
+    if (virerElec >= 60) {
       delElec();
-      virerElec=0;
+      virerElec = 0;
     }
   }
 }
@@ -539,6 +556,8 @@ function draw() {
     } else {
       drawPlay();
     }
+    // Retour Menu
+    DrawImageObject(backToMenu, centre[0] * 2 - 115, centre[1] * 2 - 115, 65, 65);
 
     // Spawn un électron environ toutes les 4 secondes
     if (jeu[4] == 300) {
@@ -552,6 +571,7 @@ function draw() {
   }
 }
 
+WaitPreload(draw);
 
 // Lancer jeu 1 joueur
 
