@@ -89,8 +89,9 @@
 	RectanglePlein(centre[0]+200, 200, 300, 100, (difficulte == 3) ? "gray" : "lightgray");
 	Texte(centre[0] + 220, 265, "Insurmontable", "red");
 	
+    setCanvasFont("helvetica", "40pt", "normal");
 	RectanglePlein(centre[0] - 150, 400, 300, 100, "orange");
-	Texte(centre[0] - 300, 265, "Rejouer", "black");
+	Texte(centre[0] - 75, 465, "Menu", "black");
   }
   
   
@@ -215,6 +216,21 @@
 		menuPrincipal();
 	  }
 	  break;
+      
+      case "params":
+        // Difficulté
+        if (x > centre[0]-500 && x < centre[0]-200 && y > 200 && y < 300) { // Normal
+          difficulte=1;
+          menuParams();
+        }else if (x > centre[0]-150 && x < centre[0]+150 && y > 200 && y < 300) { // Difficile
+          difficulte=2;
+          menuParams();
+        }else if (x > centre[0]+200 && x < centre[0]+500 && y > 200 && y < 300) { // Insurmontable
+          difficulte=3;
+          menuParams();
+        }else if (x > centre[0]-150 && x < centre[0]+150 && y > 400 && y < 500) { // Menu
+          menuPrincipal();
+        }
   
 	case "TEST":
 	  // TEST = ACTION LORS CLICK (click en bas)
@@ -258,7 +274,7 @@
    
    
 	// Victoire
-	if(jeu[2]>1){
+	if(jeu[2]>18){
 	  menuGagne();
 	}
    
