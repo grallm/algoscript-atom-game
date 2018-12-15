@@ -16,7 +16,7 @@ var electronsLibres = []; // Electrons se déplaçant: [[x, y, x0, y0, direction
 var polyElecL = []; // [[x,y,t]] Explosion lors disparition électrons libres (raté)
 FrameRate = 60;
 var recordPartie = 1; // Score partie
-if (!recordSession) var recordSession = 1; // Score record
+if (!recordSession) var recordSession = [1,1,1]; // Score record
 var difficulte = 1; // Permet de régler difficulté: nombres de touches + vitesse de baisse/montée de l'énergie
 // Démarrage
 menuPrincipal();
@@ -44,29 +44,37 @@ function menuPrincipal() {
   Texte(centre[0] - 200, 100, "Atome excitator", "black");
 
   setCanvasFont("helvetica", "40pt", "normal");
-  RectanglePlein(centre[0] - 350, 200, 300, 100, "lightblue");
-  Texte(centre[0] - 300, 265, "1 joueur", "black");
+  RectanglePlein(centre[0] - 350, 150, 300, 100, "lightblue");
+  Texte(centre[0] - 300, 215, "1 joueur", "black");
 
-  RectanglePlein(centre[0] + 50, 200, 300, 100, "yellow");
-  Texte(centre[0] + 100, 265, "2 joueurs", "black");
-  Ligne(centre[0] + 50, 300, centre[0] + 350, 200, "red");
-  Ligne(centre[0] + 50, 200, centre[0] + 350, 300, "red");
+  RectanglePlein(centre[0] + 50, 150, 300, 100, "yellow");
+  Texte(centre[0] + 100, 215, "2 joueurs", "black");
+  Ligne(centre[0] + 50, 250, centre[0] + 350, 150, "red");
+  Ligne(centre[0] + 50, 150, centre[0] + 350, 250, "red");
 
   // Règles
-  setCanvasFont("helvetica", "18pt", "normal");
-  Texte(centre[0] - 410, centre[1] - 20, "Le but est d'avoir le plus gros atome avec le plus d'électrons, vous devez ainsi: \n" + "   - attraper les électrons en réalisant la combinaison de touche à droite\n" + "   - rester entre les 2 traits de la barre d'énergie en cliquant\n\n" + "Vous perdrez des électrons en restant en-dehors des barres de limite\n" + "Votre atome explosera si vous sortez des limites de la barre d'énergie\n" + "Vous perdrez si votre atome n'a plus d'électrons\n" + "Votre atome gagne de l'énergie si vous vous trompez de combinaison", "black");
+  setCanvasFont("helvetica", "17pt", "normal");
+  Texte(50, centre[1] - 20, "Le but est d'avoir le plus gros atome avec le plus d'électrons, vous devez : \n" +
+        "   - attraper les électrons en réalisant la combinaison de touche à droite\n" + "   - rester entre les 2 traits de la barre d'énergie en cliquant\n\n" +
+        "Vous perdrez des électrons en restant en-dehors des barres de limite\n" + "Votre atome explosera si vous sortez des limites de la barre d'énergie\n" +
+        "Vous perdrez si votre atome n'a plus d'électrons\n" + "Votre atome gagne de l'énergie si vous vous trompez de combinaison", "black");
 
-  // Affiche record de la session
+  // Affiche records de la session
   setCanvasFont("helvetica", "30pt", "normal");
-  Texte(centre[0] - 220, centre[1] + 250, "Record: " + recordSession, "black");
-  dessinerNoyau(centre[0] + 40, centre[1] + 235, recordSession);
-
-/*RectanglePlein(centre[0]-150, 500, 300, 100, "lightgray");
-	Texte(centre[0]-140, 565, "Paramètres", "black");*/
+  Texte(centre[0] + centre[0]/3 + 20, centre[1] - 30, "Records:", "black");
+  setCanvasFont("helvetica", "25pt", "normal");
+  Texte(centre[0] + centre[0]/3 - 50, centre[1] + 60, "Normal: " + recordSession[0], "green"); // Normal
+  dessinerNoyau(centre[0] + centre[0]/3 + 250, centre[1] + 50, recordSession[0]);
+  setCanvasFont("helvetica", "25pt", "normal");
+  Texte(centre[0] + centre[0]/3 - 50, centre[1] + 160, "Difficile: " + recordSession[1], "orange"); // Difficile
+  dessinerNoyau(centre[0] + centre[0]/3 + 250, centre[1] + 150, recordSession[1]);
+  setCanvasFont("helvetica", "20pt", "italic");
+  Texte(centre[0] + centre[0]/3 - 50, centre[1] + 260, "Insurmontable: " + recordSession[2], "red"); // Insurmontable
+  dessinerNoyau(centre[0] + centre[0]/3 + 250, centre[1] + 250, recordSession[2]);
 
   DrawImageObject(paramsButton, 20, 20, 100, 100);
 }
-
+WaitPreload(menuPrincipal);
 
 // Menu paramètres
 
@@ -106,8 +114,8 @@ function menuPerdu() {
   jeu[0] = false;
 
   // Changer le record
-  if (recordPartie > recordSession) {
-    recordSession = recordPartie;
+  if (recordPartie > recordSession[difficulte-1]) {
+    recordSession[difficulte-1] = recordPartie;
   }
 
   // Fond flou
@@ -130,8 +138,8 @@ function menuPerdu() {
 
   // Affiche record de la session
   setCanvasFont("helvetica", "30pt", "normal");
-  Texte(centre[0] - 220, centre[1] + 200, "Record: " + recordSession, "black");
-  dessinerNoyau(centre[0] + 40, centre[1] + 185, recordSession);
+  Texte(centre[0] - 220, centre[1] + 200, "Record: " + recordSession[difficulte-1], "black");
+  dessinerNoyau(centre[0] + 40, centre[1] + 185, recordSession[difficulte-1]);
 
   resetVars();
 }
@@ -170,7 +178,7 @@ function menuGagne() {
   Texte(centre[0] - 250, centre[1], "Essayez de rejouer avec la difficulté supérieure !", "black");
 
   // Changer le record
-  recordSession = 18;
+  recordSession[difficulte-1] = 18;
 
   resetVars();
 }
@@ -499,7 +507,7 @@ var virerElec = 0;
 
 function energyBar() {
   if (energie > 0 && energie < 1000) energie -= 1 * difficulte; // Niveau de difficulte énergie
-  RectanglePlein(centre[0] / 6, yBas, 50, -Math.round(energie * hauteur / 1000), "orange");
+  RectanglePlein(centre[0] / 6, yBas, 50, -Math.round(energie * hauteur / 1000), (energie >= 375 && energie <= 625) ? "orange" : "red"); // Barre rouge si en dehors des limites
   Rectangle(centre[0] / 6, 50, 50, hauteur, "black");
   setCanvasFont("helvetica", "18pt", "normal");
   Ligne(x - 5, yHaut, x + 55, yHaut, "black");
