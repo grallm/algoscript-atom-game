@@ -20,8 +20,10 @@ if (!recordSession) var recordSession = [1,1,1]; // Score record
 var difficulte = 1; // Permet de régler difficulté: nombres de touches + vitesse de baisse/montée de l'énergie
 
 // Démarrage
-//menuPrincipal();
-menuDeuxJoueurs();
+menuPrincipal();
+//menuDeuxJoueurs();
+//partieDeuxJoueurs();
+
 
 
 // Remettre les valeurs par défaut
@@ -293,12 +295,12 @@ function dessinerNoyau(x, y, n) {
 
 // Dessiner noyau et couches
 
-function dessinerUnAtome(n, couche) {
-  dessinerNoyau(centre[0], centre[1], n);
+function dessinerUnAtome(x, y, n, couche) {
+  dessinerNoyau(x, y, n);
 
   // Dessiner toutes les sous-couches
   for (var i = 0; i < couche; i++) {
-    Cercle(centre[0], centre[1], 150 + 50 * (i), "red");
+    Cercle(x, y, 150 + 50 * (i), "red");
   }
 }
 
@@ -562,7 +564,7 @@ function energyBar() {
 function draw() {
   if (jeu[0] && jeu[1] == 1) { // Si jeu activé et 1 joueur
     Initialiser();
-    dessinerUnAtome(jeu[2], jeu[3]);
+    dessinerUnAtome(centre[0], centre[1], jeu[2], jeu[3]);
 
     drawPolyElecL();
     showCombTouchesElec();
@@ -586,6 +588,8 @@ function draw() {
 
     // Angle en degrés, passe à 0 si 360
     jeu[4] = (jeu[4] + 3 > 359) ? 0 : jeu[4] + 3;
+  }else if(jeu[0] && jeu[1] == 1){
+    
   }
 }
 
@@ -653,7 +657,23 @@ function menuDeuxJoueurs(){
   DrawImageObject(paramsButton, 20, 20, 100, 100);
   DrawImageObject(backToMenu, centre[0]*2-130, 20, 100, 100);
 }
-  
-function partieDeuxJoueurs() {
 
+// Variables 2 joueurs
+
+function partieDeuxJoueurs() {
+	Initialiser();
+	localisation = "partieDeuxJoueurs";
+  
+	jeu[0] = true; // Jeu lancé
+	jeu[1] = 2; // Jeu 1 joueur
+	// Combien de sous-couches selon numéro atomique
+	var couche;
+	if (jeu[1] % 2 == 0) {
+	  couche = jeu[1] / 2;
+	} else {
+	  couche = (jeu[1] + 1) / 2;
+	}
+  
+	// Activer l'animation
+	Loop(-1);
 }
