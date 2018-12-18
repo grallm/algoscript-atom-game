@@ -18,8 +18,10 @@ FrameRate = 60;
 var recordPartie = 1; // Score partie
 if (!recordSession) var recordSession = [1,1,1]; // Score record
 var difficulte = 1; // Permet de régler difficulté: nombres de touches + vitesse de baisse/montée de l'énergie
+
 // Démarrage
-menuPrincipal();
+//menuPrincipal();
+menuDeuxJoueurs();
 
 
 // Remettre les valeurs par défaut
@@ -49,15 +51,15 @@ function menuPrincipal() {
 
   RectanglePlein(centre[0] + 50, 150, 300, 100, "yellow");
   Texte(centre[0] + 100, 215, "2 joueurs", "black");
-  Ligne(centre[0] + 50, 250, centre[0] + 350, 150, "red");
-  Ligne(centre[0] + 50, 150, centre[0] + 350, 250, "red");
 
   // Règles
   setCanvasFont("helvetica", "17pt", "normal");
   Texte(50, centre[1] - 20, "Le but est d'avoir le plus gros atome avec le plus d'électrons, vous devez : \n" +
         "   - attraper les électrons en réalisant la combinaison de touche à droite\n" + "   - rester entre les 2 traits de la barre d'énergie en cliquant\n\n" +
         "Vous perdrez des électrons en restant en-dehors des barres de limite\n" + "Votre atome explosera si vous sortez des limites de la barre d'énergie\n" +
-        "Vous perdrez si votre atome n'a plus d'électrons\n" + "Votre atome gagne de l'énergie si vous vous trompez de combinaison", "black");
+		"Vous perdrez si votre atome n'a plus d'électrons\n" +
+		"Votre atome gagne de l'énergie si vous vous trompez de combinaison\n"+
+		"(Les chiffres pour les combinaisons NE SONT PAS ceux du pavé numérique", "black");
 
   // Affiche records de la session
   setCanvasFont("helvetica", "30pt", "normal");
@@ -74,7 +76,7 @@ function menuPrincipal() {
 
   DrawImageObject(paramsButton, 20, 20, 100, 100);
 }
-WaitPreload(menuPrincipal);
+//WaitPreload(menuPrincipal);
 
 // Menu paramètres
 
@@ -188,19 +190,15 @@ function MouseClick(x, y) {
   switch (localisation) {
   case "principal":
     // Menu: 1 joueur
-    //if (x > 500 && x < 800 && y > 200 && y < 300) {
-    if (x > centre[0] - 350 && x < centre[0] - 50 && y > 200 && y < 300) {
+    if (x > centre[0] - 350 && x < centre[0] - 50 && y > 150 && y < 250) {
       partieUnJoueur();
 
       // Menu: 2 joueurs
-/*} else if (x > 950 && x < 1150 && y > 200 && y < 300) {
-	  alert("2 joueurs");*/
+    } else if (x > centre[0] + 50 && x < centre[0] + 250 && y > 150 && y < 250) {
+      menuDeuxJoueurs();
 
       // Menu: paramètres
-/*} else if (x > 725 && x < 1025 && y > 500 && y < 600) {
-	  alert("Paramètres");*/
-
-    } else if (x > 0 && x < 110 && y > 0 && y < 110) {
+    } else if (x < 110 && y < 110) {
       menuParams();
     }
     break;
@@ -230,11 +228,11 @@ function MouseClick(x, y) {
 
   case "perduGagne":
     // Rejouer
-    if (x > centre[0] - 350 && x < centre[0] - 50 && y > 200 && y < 300) {
+    if (x > centre[0] - 350 && x < centre[0] - 50 && y > 150 && y < 250) {
       partieUnJoueur();
 
       // Menu principal
-    } else if (x > centre[0] + 50 && x < centre[0] + 350 && y > 200 && y < 300) {
+    } else if (x > centre[0] + 50 && x < centre[0] + 350 && y > 150 && y < 250) {
       menuPrincipal();
     }
     break;
@@ -253,12 +251,33 @@ function MouseClick(x, y) {
     } else if (x > centre[0] - 150 && x < centre[0] + 150 && y > 400 && y < 500) { // Menu
       menuPrincipal();
     }
+      break;
+      
+case "menuDeuxJoueurs":
+      // Jeu local
+    if (x > centre[0] - 350 && x < centre[0] - 50 && y > 150 && y < 250) {
+		alert("2 joueurs local");
 
+      // Jeu en ligne
+/*    } else if (x > centre[0] + 50 && x < centre[0] + 250 && y > 150 && y < 250) {
+       alert("2 joueurs en ligne");();*/
+
+      // Menu: paramètres
+    } else if (x < 110 && y < 110) {
+      alert("params 2 joueurs");
+      
+      // Retour Menu
+    } else if (x > (centre[0]*2-130) && y < 120) {
+      menuPrincipal();
+    }
+      break;
+      
   case "TEST":
     // TEST = ACTION LORS CLICK (click en bas)
     if (y > (centre[1] + 2 * (centre[1] / 3))) {
       menuPerdu();
     }
+      break;
   }
 }
 
@@ -573,7 +592,6 @@ function draw() {
 WaitPreload(draw);
 
 // Lancer jeu 1 joueur
-
 function partieUnJoueur() {
   Initialiser();
   localisation = "partieUnJoueur";
@@ -594,7 +612,48 @@ function partieUnJoueur() {
 
 
 // Lancer jeu 2 joueurs
+var touchesDeuxJoueurs = [[32,90,83,81,69],[13, 38, 40, 37, 39]]; // [J1:[clicks, haut, bas, gauche, droite][]] = [SPACE, Z,S,Q,D][ENTER, flèches] / -1 = souris ??
+function menuDeuxJoueurs(){
+  Initialiser();
+  localisation = "menuDeuxJoueurs";
 
+  setCanvasFont("helvetica", "40pt", "bold");
+  Texte(centre[0] - 150, 100, "2 joueurs", "black");
+
+  setCanvasFont("helvetica", "40pt", "normal");
+  RectanglePlein(centre[0] - 350, 150, 300, 100, "lightgreen");
+  Texte(centre[0] - 300, 215, "En Local", "black");
+
+  RectanglePlein(centre[0] + 50, 150, 300, 100, "blue");
+  Texte(centre[0] + 100, 215, "En Ligne", "black");
+  Ligne(centre[0] + 50, 250, centre[0] + 350, 150, "red");
+  Ligne(centre[0] + 50, 150, centre[0] + 350, 250, "red");
+
+  // Règles
+  setCanvasFont("helvetica", "17pt", "normal");
+  Texte(centre[0]/3, centre[1] - 80, "Le mode 2 joueurs se joue différemment, il peut se jouer sur le même clavier ou en ligne\n" +
+  " - EN LIGNE: vous rencontrez quelqu'un au hasard et vous jouez avec les touches configurées\n"+
+  " - EN LOCAL: vous jouez à 2 sur le même clavier, avec les touches présentées en dessous\n\n"+
+  "(Vous pouvez paramétrer vos touches dans les menu Paramètres, en haut à gauche)", "black");
+
+  // Afficher touches configurées
+  var posShowTouches = [centre[0]/3, centre[1]+160];
+  setCanvasFont("helvetica", "18pt", "bold");
+  RectanglePlein(posShowTouches[0], posShowTouches[1]-60, 50, 50, "lightgray");
+  Texte(posShowTouches[0]+5, posShowTouches[1]-30, "A", "black");
+  RectanglePlein(posShowTouches[0], posShowTouches[1], 50, 50, "lightgray");
+  Texte(posShowTouches[0]+5, posShowTouches[1]+30, "S", "black");
+  RectanglePlein(posShowTouches[0]-60, posShowTouches[1], 50, 50, "lightgray");
+  Texte(posShowTouches[0]-55, posShowTouches[1]+30, "Q", "black");
+  RectanglePlein(posShowTouches[0]+60, posShowTouches[1], 50, 50, "lightgray");
+  Texte(posShowTouches[0]+65, posShowTouches[1]+30, "D", "black");
+  RectanglePlein(posShowTouches[0], posShowTouches[1]+110, 50, 50, "lightgray");
+  Texte(posShowTouches[0]+5, posShowTouches[1]+140, "G", "black");
+
+  DrawImageObject(paramsButton, 20, 20, 100, 100);
+  DrawImageObject(backToMenu, centre[0]*2-130, 20, 100, 100);
+}
+  
 function partieDeuxJoueurs() {
 
 }
