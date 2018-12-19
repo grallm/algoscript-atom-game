@@ -26,8 +26,8 @@ var multiAtomes = []; // Coord des atomes multiples (pour atome + deplac elec) [
 // Démarrage
 //menuPrincipal();
 //menuDeuxJoueurs();
-//partieDeuxJoueurs();
-partieUnJoueur();
+partieDeuxJoueurs();
+//partieUnJoueur();
 
 
 // Remettre les valeurs par défaut
@@ -361,7 +361,7 @@ function deplacElecs() {
 		// Regarder tous les électrons par couche
 		for (var e = 0; e < electronsRotating[j][n]; e++) {
 		// Déplacement circulaire
-		CerclePlein(rayon * Math.cos(angle + 2 * e * Math.PI / electronsRotating[j][n] + n * Math.PI / 2) + centre[0], rayon * Math.sin(angle + 2 * e * Math.PI / electronsRotating[j][n] + n * Math.PI / 2) + centre[1], 20, "gray");
+			CerclePlein(rayon * Math.cos(angle + 2 * e * Math.PI / electronsRotating[j][n] + n * Math.PI / 2 + j * Math.PI / 2) + multiAtomes[j][0], rayon * Math.sin(angle + 2 * e * Math.PI / electronsRotating[j][n] + n * Math.PI / 2 + j * Math.PI / 2) + multiAtomes[j][1], 20, "gray");
 		}
 	}
 }
@@ -604,7 +604,9 @@ function draw() {
 	dessinerUnAtome(multiAtomes[0][0], multiAtomes[0][1], jeu[2][0], jeu[3][0]);
 	dessinerUnAtome(multiAtomes[1][0], multiAtomes[1][1], jeu[2][1], jeu[3][1]);
     
-    deplacElecs();
+	deplacElecs();
+	
+	jeu[4] = (jeu[4] + 3 > 359) ? 0 : jeu[4] + 3;
   }
 }
 
@@ -634,6 +636,7 @@ function partieDeuxJoueurs() {
 	localisation = "partieDeuxJoueurs";
 
 	multiAtomes = [[centre[0]-centre[0]/3, centre[1]],[centre[0]+centre[0]/3, centre[1]]];
+	electronsRotating = [[1], [1]]; // 2 atomes
   
 	jeu[0] = true; // Jeu lancé
 	jeu[1] = 2; // Jeu 1 joueur
