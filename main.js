@@ -10,8 +10,9 @@ var r = 250,
  g = 100,
  b = 150;
 var localisation; // Connaître quel menu
-var jeu = [false, 0, 1, 1, 0]; // Paramètre jeu: [EN JEU, TYPE, ATOME et ELECTRONS, COUCHES, NOMBRES ELECTRONS, ACCU pos tour ELEC]
-var electrons = [1]; // Stockage tous les électrons: nb élec / couche
+//var jeu = [false, 0, 1, 1, 0]; // Paramètre jeu: [EN JEU, TYPE, ATOME et ELECTRONS, COUCHES, NOMBRES ELECTRONS, ACCU pos tour ELEC]
+var jeu = [false, 0, [1, 1], [1, 1], 0];
+var electronsRotating = [[1]]; // Electrons sur couches et sur atomes
 var electronsLibres = []; // Electrons se déplaçant: [[x, y, x0, y0, direction, déplacements, comb touches:[ASCII, clickée ? (=1)]],[...]]
 var polyElecL = []; // [[x,y,t]] Explosion lors disparition électrons libres (raté)
 FrameRate = 60;
@@ -19,18 +20,21 @@ var recordPartie = 1; // Score partie
 if (!recordSession) var recordSession = [1,1,1]; // Score record
 var difficulte = 1; // Permet de régler difficulté: nombres de touches + vitesse de baisse/montée de l'énergie
 
+// Variables multi joueurs
+var multiAtomes = []; // Coord des atomes multiples (pour atome + deplac elec) [[x,y],[]]
+
 // Démarrage
-menuPrincipal();
+//menuPrincipal();
 //menuDeuxJoueurs();
 //partieDeuxJoueurs();
-
+partieUnJoueur();
 
 
 // Remettre les valeurs par défaut
 
 function resetVars() {
-  jeu = [false, 0, 1, 1, 0];
-  electrons = [1];
+  jeu = [false, 0, [1, 1], [1, 1], 0];
+  electronsRotating = [[1]];
   electronsLibres = [];
   polyElecL = [];
   energie = 500;
@@ -61,7 +65,7 @@ function menuPrincipal() {
         "Vous perdrez des électrons en restant en-dehors des barres de limite\n" + "Votre atome explosera si vous sortez des limites de la barre d'énergie\n" +
 		"Vous perdrez si votre atome n'a plus d'électrons\n" +
 		"Votre atome gagne de l'énergie si vous vous trompez de combinaison\n"+
-		"(Les chiffres pour les combinaisons NE SONT PAS ceux du pavé numérique", "black");
+		"(Les chiffres pour les combinaisons NE SONT PAS ceux du pavé numérique)", "black");
 
   // Affiche records de la session
   setCanvasFont("helvetica", "30pt", "normal");
@@ -176,10 +180,11 @@ function menuGagne() {
 
   // Affiche record de la session
   setCanvasFont("helvetica", "30pt", "normal");
-  Texte(centre[0] - 300, centre[1] + 200, "Record précédent: " + recordSession, "black");
-  dessinerNoyau(centre[0] + 150, centre[1] + 185, recordSession);
+  Texte(centre[0] - 300, centre[1] + 200, "Record précédent: " + recordSession[difficulte-1], "black");
+  dessinerNoyau(centre[0] + 150, centre[1] + 185, recordSession[difficulte-1]);
 
-  Texte(centre[0] - 250, centre[1], "Essayez de rejouer avec la difficulté supérieure !", "black");
+  setCanvasFont("helvetica", "30pt", "normal");
+  Texte(centre[0]*3/8, centre[1], "Essayez de rejouer avec la difficulté supérieure !", "black");
 
   // Changer le record
   recordSession[difficulte-1] = 18;
@@ -230,11 +235,11 @@ function MouseClick(x, y) {
 
   case "perduGagne":
     // Rejouer
-    if (x > centre[0] - 350 && x < centre[0] - 50 && y > 150 && y < 250) {
+    if (x > centre[0] - 350 && x < centre[0] - 50 && y > 200 && y < 300) {
       partieUnJoueur();
 
       // Menu principal
-    } else if (x > centre[0] + 50 && x < centre[0] + 350 && y > 150 && y < 250) {
+    } else if (x > centre[0] + 50 && x < centre[0] + 350 && y > 200 && y < 300) {
       menuPrincipal();
     }
     break;
@@ -305,38 +310,38 @@ function dessinerUnAtome(x, y, n, couche) {
 }
 
 
-// Rajouter un électron à l'atome
+// Rajouter un électron à l'atome, j = joueur: 0/1
 
-function addElec() {
-  if (electrons[jeu[3] - 1] < 2 + 4 * (jeu[3] - 1)) { // Ajouter 1 électron à la dernière couche
-    electrons[jeu[3] - 1] = enEntier(electrons[jeu[3] - 1]) + 1;
+function addElec(j) {
+  if (electronsRotating[j][jeu[3][j] - 1] < 2 + 4 * (jeu[3][j] - 1)) { // Ajouter 1 électron à la dernière couche
+    electronsRotating[j][jeu[3][j] - 1] = enEntier(electronsRotating[j][jeu[3][j] - 1]) + 1;
   } else {
-    jeu[3]++; // Add couche
-    electrons.push(1);
+    jeu[3][j]++; // Add couche
+    electronsRotating[j].push(1);
   }
-  jeu[2]++; // Ajouter numéro atomique
+  jeu[2][j]++; // Ajouter numéro atomique
   // Victoire
-  if (jeu[2] > 18) {
+  if (jeu[2][j] > 18) {
     menuGagne();
   }
 
   // Changer le score
-  if (jeu[2] > recordPartie) {
-    recordPartie = jeu[2];
+  if (jeu[2][j] > recordPartie) {
+    recordPartie = jeu[2][j];
   }
 }
 
 // Retirer un électron à l'atome
 
-function delElec() {
-  jeu[2]--; // Retirer numéro atomique
-  if (jeu[2] <= 0) { // Perdu car tous d'électrons
+function delElec(j) {
+  jeu[2][j]--; // Retirer numéro atomique
+  if (jeu[2][j] <= 0) { // Perdu car tous d'électrons
     menuPerdu();
-  } else if (electrons[Taille(electrons) - 1] > 1) { // Retirer 1 électron à la dernière couche
-    electrons[Taille(electrons) - 1] = enEntier(electrons[Taille(electrons) - 1]) - 1;
+  } else if (electronsRotating[j][Taille(electronsRotating[j]) - 1] > 1) { // Retirer 1 électron à la dernière couche
+    electronsRotating[j][Taille(electronsRotating[j]) - 1] = enEntier(electronsRotating[j][Taille(electronsRotating[j]) - 1]) - 1;
   } else {
-    jeu[3]--; // Retirer couche
-    electrons.pop();
+    jeu[3][j]--; // Retirer couche
+    electronsRotating[j].pop();
   }
 }
 
@@ -347,18 +352,19 @@ function deplacElecs() {
   // ELECTRONS ATOME
   var angle = 2 * Math.PI * jeu[4] / 360;
 
-  // Regarder toutes les couches
-  //Ecrire(electrons[1][0]);
-  var couche = Taille(electrons);
-  for (var n = 0; n < couche; n++) {
-    var rayon = 75 + 25 * n;
-    // Regarder tous les électrons par couche
-    for (var e = 0; e < electrons[n]; e++) {
-      //Ecrire(typeof(electrons[n][0]) + " / " + electrons[n][0]);
-      // Déplacement circulaire
-      CerclePlein(rayon * Math.cos(angle + 2 * e * Math.PI / electrons[n] + n * Math.PI / 2) + centre[0], rayon * Math.sin(angle + 2 * e * Math.PI / electrons[n] + n * Math.PI / 2) + centre[1], 20, "gray");
-    }
-  }
+  // Joueurs / Atomes
+  for(var j = 0; j < Taille(electronsRotating); j++) {
+	// Regarder toutes les couches
+	var couche = Taille(electronsRotating[j]);
+	for (var n = 0; n < couche; n++) {
+		var rayon = 75 + 25 * n;
+		// Regarder tous les électrons par couche
+		for (var e = 0; e < electronsRotating[j][n]; e++) {
+		// Déplacement circulaire
+		CerclePlein(rayon * Math.cos(angle + 2 * e * Math.PI / electronsRotating[j][n] + n * Math.PI / 2) + centre[0], rayon * Math.sin(angle + 2 * e * Math.PI / electronsRotating[j][n] + n * Math.PI / 2) + centre[1], 20, "gray");
+		}
+	}
+}
 
 
   // ELECTRONS LIBRES
@@ -400,7 +406,7 @@ function Keypressed(k) {
         if (t == touches - 1) {
           delEL = true;
           // SUCCEED
-          addElec();
+          addElec(0);
         }
         electronsLibres[0][6][t][1] = 1; // ERROR: win -> cannot read property 6 of undefined
         break;
@@ -454,7 +460,7 @@ function genCombTouchesElec(n) {
   var combTouches = [];
 
   // Générer touches, n électrons = combinaison n touches
-  var nbTouches = Math.round(jeu[2] / 4) + 1 * difficulte; // Difficulte : nombre de touches combinaison
+  var nbTouches = Math.round(jeu[2][0] / 4) + 1 * difficulte; // Difficulte : nombre de touches combinaison
   for (var i = 0; i < nbTouches; i++) {
     var touche = Hasard(36) + 65; // Lettre ou chiffre
     touche = (touche > 90) ? touche - 43 : touche;
@@ -498,7 +504,7 @@ function spawnElec() {
 
 function numElec() {
   setCanvasFont("helvetica", "30pt", "normal");
-  Texte(centre[0] + 5, 50, jeu[2], "black");
+  Texte(centre[0] + 5, 50, jeu[2][0], "black");
   CerclePlein(centre[0] - 10, 40, 20, "gray");
 }
 
@@ -551,7 +557,7 @@ function energyBar() {
   } else if (energie < 375 || energie > 625) {
     virerElec++;
     if (virerElec >= 60) {
-      delElec();
+      delElec(0);
       virerElec = 0;
     }
   }
@@ -563,8 +569,9 @@ function energyBar() {
 
 function draw() {
   if (jeu[0] && jeu[1] == 1) { // Si jeu activé et 1 joueur
-    Initialiser();
-    dessinerUnAtome(centre[0], centre[1], jeu[2], jeu[3]);
+	Initialiser();
+
+	dessinerUnAtome(multiAtomes[0][0], multiAtomes[0][1], jeu[2][0], jeu[3][0]);
 
     drawPolyElecL();
     showCombTouchesElec();
@@ -588,8 +595,16 @@ function draw() {
 
     // Angle en degrés, passe à 0 si 360
     jeu[4] = (jeu[4] + 3 > 359) ? 0 : jeu[4] + 3;
-  }else if(jeu[0] && jeu[1] == 1){
+  
     
+    
+  }else if(jeu[0] && jeu[1] == 2){ // Jeu activé, 2 joueurs
+	Initialiser();
+	
+	dessinerUnAtome(multiAtomes[0][0], multiAtomes[0][1], jeu[2][0], jeu[3][0]);
+	dessinerUnAtome(multiAtomes[1][0], multiAtomes[1][1], jeu[2][1], jeu[3][1]);
+    
+    deplacElecs();
   }
 }
 
@@ -600,18 +615,31 @@ function partieUnJoueur() {
   Initialiser();
   localisation = "partieUnJoueur";
 
+  multiAtomes = [[centre[0], centre[1]]];
+  electronsRotating = [[1]]; // 1 seul atome
+
   jeu[0] = true; // Jeu lancé
   jeu[1] = 1; // Jeu 1 joueur
-  // Combien de sous-couches selon numéro atomique
-  var couche;
-  if (jeu[1] % 2 == 0) {
-    couche = jeu[1] / 2;
-  } else {
-    couche = (jeu[1] + 1) / 2;
-  }
 
   // Activer l'animation
   Loop(-1);
+}
+
+
+
+
+// 2 joueurs
+function partieDeuxJoueurs() {
+	Initialiser();
+	localisation = "partieDeuxJoueurs";
+
+	multiAtomes = [[centre[0]-centre[0]/3, centre[1]],[centre[0]+centre[0]/3, centre[1]]];
+  
+	jeu[0] = true; // Jeu lancé
+	jeu[1] = 2; // Jeu 1 joueur
+  
+	// Activer l'animation
+	Loop(-1);
 }
 
 
@@ -656,24 +684,4 @@ function menuDeuxJoueurs(){
 
   DrawImageObject(paramsButton, 20, 20, 100, 100);
   DrawImageObject(backToMenu, centre[0]*2-130, 20, 100, 100);
-}
-
-// Variables 2 joueurs
-
-function partieDeuxJoueurs() {
-	Initialiser();
-	localisation = "partieDeuxJoueurs";
-  
-	jeu[0] = true; // Jeu lancé
-	jeu[1] = 2; // Jeu 1 joueur
-	// Combien de sous-couches selon numéro atomique
-	var couche;
-	if (jeu[1] % 2 == 0) {
-	  couche = jeu[1] / 2;
-	} else {
-	  couche = (jeu[1] + 1) / 2;
-	}
-  
-	// Activer l'animation
-	Loop(-1);
 }
