@@ -1,3 +1,15 @@
+// ATOME EXCITATOR par Malo Grall et Nathan Castel
+// ------------------------------------------
+// Jeu Javascript créé grâce à http://algoscript.info/ dans le cadre d'un projet Universitaire
+// But: Avoir le plus gros atome avec le plus d'électrons et tenir le plus longtemps possible
+// Comment: Faire les combinaisons de touches pour obtenir les électrons se baladant + ne pas
+// oublier de cliquer pour rester dans les limites d'énergie, pas dans le rouge
+// ------------------------------------------
+// Jeu en développement perpétuel (ex: ajout du multijoueur, el local et en ligne, score global)
+// Accédez aux dernières versions: https://grallm.github.io/atome-excitator/
+// ------------------------------------------
+
+var version = "1.2.3";
 // Images
 turtleEnabled = false;
 var paramsButton = PreloadImage("https://images.ecosia.org/ilbROjBxJe3GqUG2WczJ7H9nxKM=/0x390/smart/https%3A%2F%2Fcdn.pixabay.com%2Fphoto%2F2014%2F10%2F09%2F13%2F14%2Fsettings-481826_960_720.png");
@@ -24,9 +36,9 @@ var difficulte = 1; // Permet de régler difficulté: nombres de touches + vites
 var multiAtomes = []; // Coord des atomes multiples (pour atome + deplac elec) [[x,y],[]]
 
 // Démarrage
-//menuPrincipal();
+menuPrincipal();
 //menuDeuxJoueurs();
-partieDeuxJoueurs();
+//partieDeuxJoueurs();
 //partieUnJoueur();
 
 
@@ -55,8 +67,14 @@ function menuPrincipal() {
   RectanglePlein(centre[0] - 350, 150, 300, 100, "lightblue");
   Texte(centre[0] - 300, 215, "1 joueur", "black");
 
+  setCanvasFont("helvetica", "15pt", "normal");
+  Texte(centre[0]*2 - 100, 50, version, "black");
+
+  setCanvasFont("helvetica", "40pt", "normal");
   RectanglePlein(centre[0] + 50, 150, 300, 100, "yellow");
   Texte(centre[0] + 100, 215, "2 joueurs", "black");
+  Ligne(centre[0] + 50, 250, centre[0] + 350, 150, "red");
+  Ligne(centre[0] + 50, 150, centre[0] + 350, 250, "red");
 
   // Règles
   setCanvasFont("helvetica", "17pt", "normal");
@@ -263,7 +281,7 @@ function MouseClick(x, y) {
 case "menuDeuxJoueurs":
       // Jeu local
     if (x > centre[0] - 350 && x < centre[0] - 50 && y > 150 && y < 250) {
-		alert("2 joueurs local");
+		partieDeuxJoueurs();
 
       // Jeu en ligne
 /*    } else if (x > centre[0] + 50 && x < centre[0] + 250 && y > 150 && y < 250) {
